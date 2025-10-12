@@ -287,3 +287,14 @@ app.get("/test", async (_req, res) => {
 app.listen(port, () => {
   console.log(`Server running on port ${port} (ENV=${EBAY_ENV})`);
 });
+// Simple internal poller: call /sync every 10 minutes
+const POLL_MINUTES = 10;
+async function tick() {
+  try {
+    const url = `${process.env.RENDER_EXTERNAL_URL || ""}/sync`;
+    // Fallback to local path if RENDER_EXTERNAL_URL isn’t set
+    const target = url || "http://localhost:" + (process.env.PORT || 3000) + "/sync";
+    await fetch(target).catch(()=>{});
+  } catch {}
+}
+setInterval(tick, POLL_MINUTES * 60 * 1000);
